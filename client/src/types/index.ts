@@ -4,6 +4,7 @@ export interface User {
   email: string;
   display_name: string;
   role: 'student' | 'admin';
+  created_at?: string;
 }
 
 export interface AuthState {
@@ -14,37 +15,70 @@ export interface AuthState {
 
 // ─── Assessment Inputs ────────────────────────────────────────────────────────
 export interface Grades {
-  math: number;   // 60–100
+  math: number;
   science: number;
   english: number;
+  filipinoAp: number;
+  tle: number;
 }
 
-export type RIASECKey = 'realistic' | 'investigative' | 'artistic' | 'social' | 'enterprising' | 'conventional';
+export type RIASECKey =
+  | 'realistic'
+  | 'investigative'
+  | 'artistic'
+  | 'social'
+  | 'enterprising'
+  | 'conventional';
 
-export type RIASECScores = Record<RIASECKey, number>; // 0–100 after averaging & scaling
+export type RIASECScores = Record<RIASECKey, number>;
 
-export interface AptitudeRatings {
-  logical: number;   // 25 | 50 | 75 | 100
-  spatial: number;
-  linguistic: number;
+export type ProblemType = 'puzzles' | 'people' | 'tools' | 'business';
+export type AfterGrade12 = 'college' | 'tesda' | 'business' | 'unsure';
+export type ClassPick = 'lab' | 'debate' | 'accounting' | 'workshop';
+export type Constraint = 'none' | 'budget' | 'offerings' | 'family';
+export type LifePriority = 'income' | 'meaning' | 'both';
+export type LocationPref = 'city' | 'hometown' | 'open';
+export type GradeSource = 'reportCard' | 'estimate' | '';
+
+/** Work-style and values answers. Saved in `aptitude_ratings` JSONB. */
+export interface WorkProfile {
+  problemType: ProblemType | '';
+  afterGrade12: AfterGrade12 | '';
+  classPick: ClassPick | '';
+  constraint: Constraint | '';
+  priority: LifePriority | '';
+  location: LocationPref | '';
+  targetCourse: string;
+  gradeSource: GradeSource;
 }
+
+/** @deprecated Old self-rated aptitude shape — still present on saved records. */
+export interface LegacyAptitudeRatings {
+  logical?: number;
+  spatial?: number;
+  linguistic?: number;
+}
+
+export type AptitudeRatings = WorkProfile & LegacyAptitudeRatings;
 
 export interface FISInput {
   grades: Grades;
   riasecScores: RIASECScores;
-  aptitude: AptitudeRatings;
+  profile: WorkProfile;
 }
 
-// ─── FIS Output ───────────────────────────────────────────────────────────────
 export type StrandKey = 'STEM' | 'ABM' | 'HUMSS' | 'TVL' | 'GAS';
 
 export interface FISResult {
   strand: StrandKey;
-  degreeOfMatch: number; // 0–100
-  drivenBy: string[];    // top input labels that fired this strand
+  degreeOfMatch: number;
+  drivenBy: string[];
+  closeCall?: boolean;
+  hollandCode?: string;
+  counselorNote?: string;
+  targetStrand?: StrandKey | null;
 }
 
-// ─── Saved Assessment ─────────────────────────────────────────────────────────
 export interface Assessment {
   id: string;
   user_id: string;
@@ -57,13 +91,4 @@ export interface Assessment {
   email?: string;
 }
 
-// ─── RIASEC Raw Answers ───────────────────────────────────────────────────────
-export type RIASECAnswers = Record<RIASECKey, number[]>; // each dimension has 4 answers (1–5)
-
-// ─── Assessment Wizard State ──────────────────────────────────────────────────
-export type AptitudeKey = 'logical' | 'spatial' | 'linguistic';
-
-export interface AptitudeCardOption {
-  label: string;
-  value: number;
-}
+export type RIASECAnswers = Record<string, number>;

@@ -5,10 +5,26 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { COLORS, SPACING, RADIUS, FONT_SIZE } from '../../constants/design';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { apiGet, apiPatch } from '../../services/api';
-import { Assessment, User } from '../../types';
+import { Assessment, FISResult, User } from '../../types';
 import { CAREER_PATHS } from '../../data/careerPaths';
+
+function openAssessment(router: ReturnType<typeof useRouter>, a: Assessment) {
+  const recs: FISResult[] = a.recommendations ?? [];
+  router.push({
+    pathname: '/results',
+    params: {
+      results: JSON.stringify(recs),
+      grades: JSON.stringify(a.grades ?? {}),
+      riasecScores: JSON.stringify(a.riasec_scores ?? {}),
+      aptitude: JSON.stringify(a.aptitude_ratings ?? {}),
+      readOnly: 'true',
+      studentName: a.display_name ?? '',
+    },
+  });
+}
 
 type AdminTab = 'overview' | 'assessments' | 'users';
 
@@ -46,6 +62,7 @@ const chart = StyleSheet.create({
 
 // ─── Main Admin Screen ────────────────────────────────────────────────────────
 export default function AdminScreen() {
+  const router = useRouter();
   const { token, user: me } = useAuth();
   const [tab, setTab] = useState<AdminTab>('overview');
   const [assessments, setAssessments] = useState<Assessment[]>([]);
@@ -106,10 +123,22 @@ export default function AdminScreen() {
     );
   });
 
+  const studentCount = users.filter((u) => u.role === 'student').length;
+  const latestByUser = new Map<string, Assessment>();
+  assessments.forEach((a) => {
+    if (!latestByUser.has(a.user_id)) latestByUser.set(a.user_id, a);
+  });
+
+  const filteredUsers = users.filter((u) => {
+    if (!search) return true;
+    const s = search.toLowerCase();
+    return u.display_name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s);
+  });
+
   const TABS: { key: AdminTab; label: string }[] = [
     { key: 'overview', label: 'Overview' },
     { key: 'assessments', label: 'Assessments' },
-    { key: 'users', label: 'Users' },
+    { key: 'users', label: 'Students' },
   ];
 
   return (
@@ -147,8 +176,8 @@ export default function AdminScreen() {
               {/* Stat Cards */}
               <View style={styles.statsRow}>
                 <View style={styles.statCard}>
-                  <Text style={styles.statNum}>{users.length}</Text>
-                  <Text style={styles.statLabel}>Total Users</Text>
+                  <Text style={styles.statNum}>{studentCount}</Text>
+                  <Text style={styles.statLabel}>Students</Text>
                 </View>
                 <View style={styles.statCard}>
                   <Text style={styles.statNum}>{assessments.length}</Text>
@@ -168,7 +197,7 @@ export default function AdminScreen() {
                 const top = (a.recommendations as { strand: string; degreeOfMatch: number }[])[0];
                 const cp = top ? CAREER_PATHS[top.strand as keyof typeof CAREER_PATHS] : null;
                 return (
-                  <View key={a.id} style={styles.recentCard}>
+                  <TouchableOpacity key={a.id} style={styles.recentCard} onPress={() => openAssessment(router, a)} activeOpacity={0.85}>
                     <View style={[styles.avatarCircle, { backgroundColor: cp?.color ?? COLORS.primary }]}>
                       <Text style={styles.avatarText}>{a.display_name?.[0]?.toUpperCase() ?? '?'}</Text>
                     </View>
@@ -179,7 +208,7 @@ export default function AdminScreen() {
                     <Text style={styles.recentDate}>
                       {new Date(a.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 );
               })}
             </ScrollView>
@@ -205,7 +234,7 @@ export default function AdminScreen() {
                   const top = (a.recommendations as { strand: string; degreeOfMatch: number }[])[0];
                   const cp = top ? CAREER_PATHS[top.strand as keyof typeof CAREER_PATHS] : null;
                   return (
-                    <View style={styles.assessmentRow}>
+                    <TouchableOpacity style={styles.assessmentRow} onPress={() => openAssessment(router, a)} activeOpacity={0.82}>
                       <View style={[styles.avatarCircle, { backgroundColor: cp?.color ?? COLORS.primary }]}>
                         <Text style={styles.avatarText}>{a.display_name?.[0]?.toUpperCase() ?? '?'}</Text>
                       </View>
@@ -216,7 +245,8 @@ export default function AdminScreen() {
                           {new Date(a.created_at).toLocaleDateString('en-PH')} · {top?.strand} · {top?.degreeOfMatch}%
                         </Text>
                       </View>
-                    </View>
+                      <Text style={styles.assessmentChevron}>›</Text>
+                    </TouchableOpacity>
                   );
                 }}
                 ListEmptyComponent={<Text style={styles.emptyText}>No assessments found.</Text>}
@@ -316,6 +346,7 @@ const styles = StyleSheet.create({
   assessmentName: { fontSize: FONT_SIZE.md, fontWeight: '700', color: COLORS.text },
   assessmentEmail: { fontSize: FONT_SIZE.xs, color: COLORS.textSecondary },
   assessmentMeta: { fontSize: FONT_SIZE.xs, color: COLORS.textMuted, marginTop: 2 },
+  assessmentChevron: { alignSelf: 'center', fontSize: FONT_SIZE.xl, color: COLORS.textMuted },
   emptyText: { textAlign: 'center', color: COLORS.textMuted, marginTop: SPACING.xl },
   userRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, backgroundColor: COLORS.white, borderRadius: RADIUS.md, padding: SPACING.md, borderWidth: 1, borderColor: COLORS.border },
   userInfo: { flex: 1 },

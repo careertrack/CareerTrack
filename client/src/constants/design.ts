@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export const COLORS = {
   primary: '#2E5BFF',
   primaryLight: '#EEF2FF',
@@ -45,4 +47,6 @@ export const FONT_SIZE = {
   xxxl: 40,
 };
 
-export const API_BASE_URL = 'http://10.0.2.2:3000'; // Android emulator alias for host localhost
+const envApiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+
+export const API_BASE_URL = envApiBaseUrl || (Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001');

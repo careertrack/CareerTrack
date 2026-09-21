@@ -76,8 +76,8 @@ export default function HomeScreen() {
           <View style={styles.heroContent}>
             <Text style={styles.heroTitle}>Ready to discover{'\n'}your strand?</Text>
             <Text style={styles.heroSubtitle}>
-              Answer 30 questions about your grades, interests, and skills.
-              Our Fuzzy Logic engine finds your perfect fit.
+              Answer 30 questions about grades, interests, and how you like to work.
+              On-device fuzzy logic ranks all five strands.
             </Text>
             <TouchableOpacity style={styles.heroButton} onPress={handleStartAssessment} activeOpacity={0.88}>
               <Text style={styles.heroButtonText}>Start Assessment →</Text>
@@ -159,7 +159,7 @@ export default function HomeScreen() {
             <View style={styles.modalInner}>
               <Text style={styles.modalTitle}>Let's find your strand</Text>
               <Text style={styles.modalSubtitle}>
-                I'll analyze your grades, interests, and aptitude to recommend the best academic path for you.
+                I'll look at your grades, interests, and how you like to work — then rank the five SHS strands.
               </Text>
 
               <View style={styles.modalStats}>

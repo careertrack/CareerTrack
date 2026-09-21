@@ -21,6 +21,7 @@ export default function ResultsScreen() {
     riasecScores: string;
     aptitude: string;
     readOnly?: string;
+    studentName?: string;
   }>();
 
   const results: FISResult[] = JSON.parse(params.results ?? '[]');
@@ -28,6 +29,7 @@ export default function ResultsScreen() {
   const riasecScores: RIASECScores = JSON.parse(params.riasecScores ?? '{}');
   const aptitude: AptitudeRatings = JSON.parse(params.aptitude ?? '{}');
   const isReadOnly = params.readOnly === 'true';
+  const studentName = params.studentName;
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved]   = useState(false);
@@ -78,7 +80,7 @@ export default function ResultsScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backBtnText}>‹</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Your Results</Text>
+        <Text style={styles.headerTitle}>{studentName ? `${studentName}'s Results` : 'Your Results'}</Text>
         <View style={{ width: 36 }} />
       </View>
 
@@ -95,9 +97,25 @@ export default function ResultsScreen() {
             <Text style={styles.topBannerIcon}>{CAREER_PATHS[top.strand]?.icon}</Text>
             <Text style={styles.topStrand}>{top.strand}</Text>
             <Text style={styles.topStrandFull}>{CAREER_PATHS[top.strand]?.fullName}</Text>
-            <Text style={styles.topPct}>{top.degreeOfMatch}% Match</Text>
+            <Text style={styles.topPct}>{top.degreeOfMatch}% of recommendation evidence</Text>
+            {top.hollandCode ? (
+              <Text style={styles.hollandCode}>Holland code {top.hollandCode}</Text>
+            ) : null}
           </Animated.View>
         )}
+
+        {top?.closeCall ? (
+          <Animated.View entering={FadeInDown.delay(120).springify()} style={styles.closeCall}>
+            <Text style={styles.closeCallTitle}>Close call</Text>
+            <Text style={styles.closeCallText}>
+              {top.counselorNote ?? 'Your top two strands are close. Talk with your guidance counselor before you lock in.'}
+            </Text>
+          </Animated.View>
+        ) : top?.counselorNote ? (
+          <Animated.View entering={FadeInDown.delay(120).springify()} style={styles.closeCall}>
+            <Text style={styles.closeCallText}>{top.counselorNote}</Text>
+          </Animated.View>
+        ) : null}
 
         {/* Disclaimer */}
         <Animated.View entering={FadeInDown.delay(150).springify()} style={styles.disclaimer}>
@@ -146,7 +164,7 @@ export default function ResultsScreen() {
                       ]}
                     />
                   </View>
-                  <Text style={[styles.pctLabel, { color }]}>{r.degreeOfMatch}% match</Text>
+                  <Text style={[styles.pctLabel, { color }]}>{r.degreeOfMatch}% of recommendation evidence</Text>
 
                   {/* Driven-by chips */}
                   {r.drivenBy.length > 0 && (
@@ -234,6 +252,16 @@ const styles = StyleSheet.create({
   topStrand: { fontSize: FONT_SIZE.xxxl, fontWeight: '900', color: COLORS.white, letterSpacing: -1 },
   topStrandFull: { fontSize: FONT_SIZE.sm, color: 'rgba(255,255,255,0.85)', textAlign: 'center', marginTop: 4 },
   topPct: { fontSize: FONT_SIZE.xl, fontWeight: '800', color: COLORS.white, marginTop: SPACING.sm },
+  hollandCode: { fontSize: FONT_SIZE.sm, color: 'rgba(255,255,255,0.85)', marginTop: 6, fontWeight: '600' },
+  closeCall: {
+    backgroundColor: '#EEF2FF',
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#6366F1',
+  },
+  closeCallTitle: { fontSize: FONT_SIZE.sm, fontWeight: '800', color: '#3730A3', marginBottom: 4 },
+  closeCallText: { fontSize: FONT_SIZE.sm, color: '#312E81', lineHeight: 20 },
   disclaimer: {
     backgroundColor: '#FFF8E7',
     borderRadius: RADIUS.md,

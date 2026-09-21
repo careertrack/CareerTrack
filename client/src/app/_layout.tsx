@@ -46,6 +46,7 @@ export default function RootLayout() {
           <Stack.Screen name="assessment" options={{ animation: 'slide_from_bottom' }} />
           <Stack.Screen name="results" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="roadmap" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="admin-student" options={{ animation: 'slide_from_right' }} />
         </Stack>
       </AuthGate>
     </AuthProvider>
