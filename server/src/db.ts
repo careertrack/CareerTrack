@@ -3,13 +3,18 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is required to start the API.');
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  // Keep this small for a single API instance; use Render's pool URL if scaling.
+  max: Number(process.env.DATABASE_MAX_CLIENTS ?? 10),
 });
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
-  process.exit(-1);
 });
 
 export default pool;

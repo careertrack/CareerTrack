@@ -11,8 +11,9 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.careertrack.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#2E5BFF"
       },
       "predictiveBackGestureEnabled": false
