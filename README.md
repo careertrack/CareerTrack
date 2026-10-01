@@ -99,3 +99,4 @@ fuzz/
 | GET | /api/assessments | Admin | All assessments |
 | DELETE | /api/assessments/:id | JWT | Delete (own only) |
 # CareerTrack
+# CareerTrack
