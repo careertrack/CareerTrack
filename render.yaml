@@ -1,7 +1,6 @@
-databases:
-  - name: careertrack-db
-    databaseName: careertrack
-    user: careertrack
+# API only. Create PostgreSQL as a separate Render resource, then paste
+# its External Database URL into this service as DATABASE_URL.
+# Do not commit the real connection string.
 
 services:
   - type: web
@@ -15,9 +14,11 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DATABASE_SSL
+        value: true
+      - key: DATABASE_MAX_CLIENTS
+        value: "10"
       - key: DATABASE_URL
-        fromDatabase:
-          name: careertrack-db
-          property: connectionString
+        sync: false
       - key: JWT_SECRET
         generateValue: true
